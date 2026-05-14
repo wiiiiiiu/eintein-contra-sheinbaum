@@ -1,0 +1,51 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PVZ Style Game</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- TOP -->
+  <div id="topBar">
+
+    <div id="logo">
+      ☀ <span id="sunCount">200</span>
+    </div>
+
+    <!-- CARTAS -->
+    <div id="cards">
+
+      <div class="card" data-plant="peashooter">
+        <img src="img/peashooter.png">
+        <span>100</span>
+      </div>
+
+      <div class="card" data-plant="sunflower">
+        <img src="img/sunflower.png">
+        <span>50</span>
+      </div>
+
+      <div class="card" data-plant="wallnut">
+        <img src="img/wallnut.png">
+        <span>75</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- JUEGO -->
+  <div id="gameContainer">
+
+    <div id="grid"></div>
+
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
