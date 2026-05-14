@@ -1,5 +1,3 @@
-// game.js
-
 // ======================================
 // IMAGENES
 // ======================================
@@ -10,7 +8,8 @@ const IMAGES = {
 
     peashooter:"img/peashooter.png",
     sunflower:"img/sunflower.png",
-    wallnut:"img/wallnut.png"
+    wallnut:"img/wallnut.png",
+    torchwood:"img/torchwood.png"
 
   },
 
@@ -34,9 +33,19 @@ const cols = 9;
 
 const grid = document.getElementById("grid");
 const sunCount = document.getElementById("sunCount");
+const timerFill = document.getElementById("timerFill");
 
 let suns = 200;
+
 let selectedPlant = null;
+
+let shovelMode = false;
+
+let gameMode = "infinite";
+
+let gameStarted = false;
+
+let gameTime = 180;
 
 const plants = [];
 const zombies = [];
@@ -60,9 +69,14 @@ const PLANT_DATA = {
     sunProducer:true
   },
 
- wallnut:{
+  wallnut:{
     cost:75,
     hp:400
+  },
+
+  torchwood:{
+    cost:125,
+    hp:140
   }
 };
 
@@ -84,6 +98,27 @@ for(let r=0;r<rows;r++){
     grid.appendChild(cell);
 
     cell.addEventListener("click", ()=>{
+
+      // PALA
+      if(shovelMode){
+
+        const plantElement = cell.querySelector(".plant");
+
+        if(!plantElement) return;
+
+        const index = plants.findIndex(
+          p => p.element === plantElement
+        );
+
+        if(index !== -1){
+
+          plants[index].element.remove();
+
+          plants.splice(index,1);
+        }
+
+        return;
+      }
 
       if(!selectedPlant) return;
 
@@ -111,15 +146,91 @@ document.querySelectorAll(".card").forEach(card=>{
 
   card.addEventListener("click", ()=>{
 
+    if(card.id === "shovel") return;
+
     document.querySelectorAll(".card")
       .forEach(c=>c.classList.remove("selected"));
 
     card.classList.add("selected");
 
     selectedPlant = card.dataset.plant;
+
+    shovelMode = false;
   });
 
 });
+
+// ======================================
+// PALA
+// ======================================
+
+const shovel = document.getElementById("shovel");
+
+shovel.addEventListener("click", ()=>{
+
+  shovelMode = true;
+
+  selectedPlant = null;
+
+  document.querySelectorAll(".card")
+    .forEach(c=>c.classList.remove("selected"));
+
+  shovel.classList.add("selected");
+});
+
+// ======================================
+// MENU
+// ======================================
+
+document.getElementById("mode3min")
+.addEventListener("click", ()=>{
+
+  gameMode = "3min";
+
+  startGame();
+});
+
+document.getElementById("modeInfinite")
+.addEventListener("click", ()=>{
+
+  gameMode = "infinite";
+
+  startGame();
+});
+
+function startGame(){
+
+  document.getElementById("menu").style.display = "none";
+
+  gameStarted = true;
+
+  if(gameMode === "3min"){
+
+    const interval = setInterval(()=>{
+
+      gameTime--;
+
+      const percent = (gameTime / 180) * 100;
+
+      timerFill.style.width = percent + "%";
+
+      if(gameTime <= 0){
+
+        clearInterval(interval);
+
+        alert("GANASTE!");
+
+        location.reload();
+      }
+
+    },1000);
+
+  }else{
+
+    timerFill.style.display = "none";
+  }
+
+}
 
 // ======================================
 // CREAR PLANTA
@@ -147,7 +258,7 @@ function createPlant(type, cell, row, col){
     cooldown:0
   };
 
- plants.push(data);
+  plants.push(data);
 }
 
 // ======================================
@@ -217,11 +328,15 @@ function createZombie(type, row){
 // BALAS
 // ======================================
 
-function createBullet(x,y,row){
+function createBullet(x,y,row,fire=false){
 
   const bullet = document.createElement("div");
 
   bullet.classList.add("bullet");
+
+  if(fire){
+    bullet.classList.add("fireBullet");
+  }
 
   grid.appendChild(bullet);
 
@@ -234,7 +349,8 @@ function createBullet(x,y,row){
     x,
     y,
     row,
-    speed:5
+    speed:5,
+    fire
   });
 }
 
@@ -286,6 +402,13 @@ function createSun(x,y){
 
 function gameLoop(){
 
+  if(!gameStarted){
+
+    requestAnimationFrame(gameLoop);
+
+    return;
+  }
+
   // ==================================
   // PLANTAS
   // ==================================
@@ -294,17 +417,32 @@ function gameLoop(){
 
     plant.cooldown--;
 
-    // DISPARO
+    // PEASHOOTER
     if(plant.type === "peashooter"){
 
       const enemy = zombies.find(z=>z.row===plant.row);
 
       if(enemy && plant.cooldown <= 0){
 
+        let fire = false;
+
+        plants.forEach(p=>{
+
+          if(
+            p.type === "torchwood" &&
+            p.row === plant.row &&
+            p.col > plant.col
+          ){
+            fire = true;
+          }
+
+        });
+
         createBullet(
           plant.col*100+70,
           plant.row*100+40,
-          plant.row
+          plant.row,
+          fire
         );
 
         plant.cooldown = 100;
@@ -328,7 +466,7 @@ function gameLoop(){
   });
 
   // ==================================
-  // BULLETS
+  // BALAS
   // ==================================
 
   bullets.forEach((bullet,bi)=>{
@@ -343,7 +481,11 @@ function gameLoop(){
 
       if(bullet.x > zombie.x){
 
-        zombie.hp -= 20;
+        if(bullet.fire){
+          zombie.hp -= 40;
+        }else{
+          zombie.hp -= 20;
+        }
 
         zombie.hpBar.style.width =
           (zombie.hp/zombie.maxHp)*100 + "%";
@@ -419,29 +561,37 @@ gameLoop();
 
 setInterval(()=>{
 
-  const row = Math.floor(Math.random()*rows);
+  if(!gameStarted) return;
 
-  const random = Math.random();
+  for(let i=0;i<2;i++){
 
-  let type = "normal";
+    const row = Math.floor(Math.random()*rows);
 
-  if(random > 0.6){
-    type = "cone";
+    const random = Math.random();
+
+    let type = "normal";
+
+    if(random > 0.6){
+      type = "cone";
+    }
+
+    if(random > 0.85){
+      type = "bucket";
+    }
+
+    createZombie(type,row);
+
   }
 
-  if(random > 0.85){
-    type = "bucket";
-  }
-
-  createZombie(type,row);
-
-},3000);
+},2500);
 
 // ======================================
 // GENERADOR DE SOLES
 // ======================================
 
 setInterval(()=>{
+
+  if(!gameStarted) return;
 
   createSun(
 
