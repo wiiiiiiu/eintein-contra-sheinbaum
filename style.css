@@ -13,6 +13,49 @@ body{
 }
 
 /* ========================= */
+/* MENU */
+/* ========================= */
+
+#menu{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+
+  z-index:999;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+
+  gap:20px;
+}
+
+#menu h1{
+  color:white;
+  font-size:60px;
+}
+
+#menu button{
+  width:250px;
+  height:70px;
+
+  font-size:28px;
+  font-weight:bold;
+
+  border:none;
+  border-radius:12px;
+
+  cursor:pointer;
+
+  background:#ffd84d;
+}
+
+#menu button:hover{
+  transform:scale(1.05);
+}
+
+/* ========================= */
 /* TOP */
 /* ========================= */
 
@@ -21,7 +64,7 @@ body{
   height:100px;
   background:#3f7a29;
 
- gin-bottom:10px;
+  margin-bottom:10px;
 
   display:flex;
   align-items:center;
@@ -36,18 +79,38 @@ body{
   font-weight:bold;
 }
 
-#sunBox{
-  background:#ffd84d;
-  padding:10px 20px;
-  border-radius:10px;
-  font-size:28px;
-  font-weight:bold;
-}
-
 #cards{
   display:flex;
   gap:15px;
 }
+
+/* ========================= */
+/* TIMER */
+/* ========================= */
+
+#timerBox{
+  width:300px;
+  height:30px;
+
+  background:#222;
+  border:3px solid white;
+  border-radius:20px;
+
+  overflow:hidden;
+}
+
+#timerFill{
+  width:100%;
+  height:100%;
+
+  background:lime;
+
+  transition:width 1s linear;
+}
+
+/* ========================= */
+/* CARTAS */
+/* ========================= */
 
 .card{
   width:90px;
@@ -64,7 +127,7 @@ body{
   align-items:center;
   justify-content:center;
 
- ition:transform 0.2s;
+  transition:transform 0.2s;
 }
 
 .card:hover{
@@ -84,6 +147,11 @@ body{
   font-weight:bold;
 }
 
+.shovelCard{
+  font-size:38px;
+  color:black;
+}
+
 /* ========================= */
 /* GAME */
 /* ========================= */
@@ -101,7 +169,7 @@ body{
   width:900px;
   height:500px;
 
- position:relative;
+  position:relative;
 
   display:grid;
   grid-template-columns:repeat(9, 1fr);
@@ -120,7 +188,6 @@ body{
   position:relative;
 }
 
-/* cuadricula visual */
 .cell::after{
   content:"";
   position:absolute;
@@ -138,7 +205,7 @@ body{
   width:80px;
   height:80px;
 
- left:50%;
+  left:50%;
   top:50%;
   transform:translate(-50%, -50%);
 
@@ -154,7 +221,7 @@ body{
   width:90px;
   height:90px;
 
- z-index:10;
+  z-index:10;
 }
 
 .health{
@@ -162,7 +229,7 @@ body{
   top:-8px;
   left:0;
 
- height:6px;
+  height:6px;
   background:red;
 }
 
@@ -177,6 +244,11 @@ body{
   background:#6b3f16;
   border-radius:50%;
   z-index:20;
+}
+
+.fireBullet{
+  background:orange !important;
+  box-shadow:0 0 15px red;
 }
 
 /* ========================= */
