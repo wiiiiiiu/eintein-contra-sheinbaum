@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,11 +9,27 @@
 </head>
 <body>
 
+  <!-- MENU -->
+  <div id="menu">
+
+    <h1>PVZ STYLE</h1>
+
+    <button id="mode3min">Modo 3 Minutos</button>
+
+    <button id="modeInfinite">Modo Infinito</button>
+
+  </div>
+
   <!-- TOP -->
   <div id="topBar">
 
     <div id="logo">
       ☀ <span id="sunCount">200</span>
+    </div>
+
+    <!-- TIMER -->
+    <div id="timerBox">
+      <div id="timerFill"></div>
     </div>
 
     <!-- CARTAS -->
@@ -35,11 +50,24 @@
         <span>75</span>
       </div>
 
+      <div class="card" data-plant="torchwood">
+        <img src="img/torchwood.png">
+        <span>125</span>
+      </div>
+
+      <!-- PALA -->
+      <div class="card" id="shovel">
+
+  <img src="img/shovel.png">
+
+  <span>Pala</span>
+
+</div>
     </div>
 
   </div>
 
-  <!-- JUEGO -->
+  <!-- GAME -->
   <div id="gameContainer">
 
     <div id="grid"></div>
