@@ -9,7 +9,8 @@ const IMAGES = {
     peashooter:"img/peashooter.png",
     sunflower:"img/sunflower.png",
     wallnut:"img/wallnut.png",
-    torchwood:"img/torchwood.png"
+    torchwood:"img/torchwood.png",
+    doomshroom:"img/doomshroom.png"
 
   },
 
@@ -50,6 +51,7 @@ let gameTime = 180;
 const plants = [];
 const zombies = [];
 const bullets = [];
+const lawnmowers = [];
 
 // ======================================
 // COSTOS
@@ -77,6 +79,12 @@ const PLANT_DATA = {
   torchwood:{
     cost:125,
     hp:140
+  },
+
+  doomshroom:{
+    cost:125,
+    hp:9999,
+    explosive:true
   }
 };
 
@@ -136,6 +144,34 @@ for(let r=0;r<rows;r++){
 
     });
   }
+}
+
+// ======================================
+// PODADORAS
+// ======================================
+
+for(let r=0;r<rows;r++){
+
+  const mower = document.createElement("div");
+
+  mower.classList.add("lawnmower");
+
+  mower.innerHTML = "🚜";
+
+  grid.appendChild(mower);
+
+  mower.style.left = "0px";
+  mower.style.top = (r*100+20)+"px";
+
+  lawnmowers.push({
+
+    row:r,
+    x:0,
+    active:false,
+    used:false,
+    element:mower
+
+  });
 }
 
 // ======================================
@@ -243,6 +279,10 @@ function createPlant(type, cell, row, col){
   plant.src = IMAGES.plants[type];
 
   plant.classList.add("plant");
+
+  if(type === "doomshroom"){
+    plant.classList.add("doomShroom");
+  }
 
   cell.appendChild(plant);
 
@@ -418,6 +458,7 @@ function gameLoop(){
     plant.cooldown--;
 
     // PEASHOOTER
+
     if(plant.type === "peashooter"){
 
       const enemy = zombies.find(z=>z.row===plant.row);
@@ -450,6 +491,7 @@ function gameLoop(){
     }
 
     // GIRASOL
+
     if(plant.type === "sunflower"){
 
       if(plant.cooldown <= 0){
@@ -527,6 +569,58 @@ function gameLoop(){
 
       if(zombie.x <= px+50){
 
+        // ==================================
+        // PETASETA
+        // ==================================
+
+        if(plant.type === "doomshroom"){
+
+          const explosion = document.createElement("div");
+
+          explosion.classList.add("explosion");
+
+          explosion.style.width = "300px";
+          explosion.style.height = "300px";
+
+          explosion.style.left = (plant.col*100 - 100)+"px";
+          explosion.style.top = (plant.row*100 - 100)+"px";
+
+          explosion.style.background = "purple";
+
+          grid.appendChild(explosion);
+
+          setTimeout(()=>{
+
+            explosion.remove();
+
+          },500);
+
+          zombies.forEach((z,zi)=>{
+
+            const dx = Math.abs(z.x - (plant.col*100));
+
+            const dy = Math.abs(z.row - plant.row);
+
+            if(dx < 180 && dy <= 1){
+
+              z.element.remove();
+
+              zombies.splice(zi,1);
+
+              suns += 25;
+            }
+
+          });
+
+          updateSun();
+
+          plant.element.remove();
+
+          plants.splice(pi,1);
+
+          return;
+        }
+
         zombie.x += zombie.speed;
 
         plant.hp -= 0.4;
@@ -540,7 +634,51 @@ function gameLoop(){
       }
     });
 
+    // ==================================
+    // PODADORAS
+    // ==================================
+
+    lawnmowers.forEach((mower)=>{
+
+      if(mower.used) return;
+
+      if(
+        zombie.row === mower.row &&
+        zombie.x <= 40
+      ){
+
+        mower.active = true;
+        mower.used = true;
+      }
+
+      if(mower.active){
+
+        mower.x += 8;
+
+        mower.element.style.left = mower.x+"px";
+
+        zombies.forEach((z,zi)=>{
+
+          if(
+            z.row === mower.row &&
+            Math.abs(z.x - mower.x) < 60
+          ){
+
+            z.element.remove();
+            zombies.splice(zi,1);
+
+            suns += 25;
+            updateSun();
+          }
+
+        });
+
+      }
+
+    });
+
     // GAME OVER
+
     if(zombie.x <= -50){
 
       alert("GAME OVER");
