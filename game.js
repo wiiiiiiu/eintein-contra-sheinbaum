@@ -365,17 +365,17 @@ function createZombie(type, row){
   let speed = 0.3 + (currentLevel * 0.03);
 
   if(type === "cone"){
-    hp = 180;
+    hp = 230;
   }
 
   if(type === "bucket"){
-    hp = 300;
+    hp = 350;
     speed = 0.2;
   }
 
   if(type === "boss"){
 
-    hp = 2500;
+    hp = 8000;
 
     speed = 0.15;
 
