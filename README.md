@@ -26,8 +26,8 @@
 
 
 ## 🤝 Contribuciones
-yo merengues
-el pri
-negroxdd (asi se llama en tlictlok creo)
+*yo merengues
+*el pri
+*negroxdd (asi se llama en tlictlok creo)
 
 
