@@ -20,6 +20,7 @@ const IMAGES = {
     cone:"img/conehead.png",
     bucket:"img/buckethead.png",
     boss:"img/boss.png"
+
   },
 
   sun:"img/sun.png"
@@ -274,9 +275,16 @@ function startGame(){
 
         clearInterval(interval);
 
-        alert("GANASTE!");
+        if(currentLevel < 3){
 
-        location.reload();
+          alert("GANASTE!");
+
+          location.reload();
+
+        }else{
+
+          alert("DERROTA AL JEFE FINAL!");
+        }
       }
 
     },1000);
@@ -299,8 +307,6 @@ function createPlant(type, cell, row, col){
   plant.src = IMAGES.plants[type];
 
   plant.classList.add("plant");
-
-  // PETASETA
 
   if(type === "doomshroom"){
     plant.classList.add("doomShroom");
@@ -333,6 +339,10 @@ function createZombie(type, row){
 
   zombie.classList.add("zombie");
 
+  if(type === "boss"){
+    zombie.classList.add("bossZombie");
+  }
+
   const img = document.createElement("img");
 
   img.src = IMAGES.zombies[type];
@@ -350,9 +360,9 @@ function createZombie(type, row){
 
   grid.appendChild(zombie);
 
-let hp = 100 + (currentLevel * 20);
+  let hp = 100 + (currentLevel * 20);
 
-let speed = 0.3 + (currentLevel * 0.03);
+  let speed = 0.3 + (currentLevel * 0.03);
 
   if(type === "cone"){
     hp = 180;
@@ -365,14 +375,13 @@ let speed = 0.3 + (currentLevel * 0.03);
 
   if(type === "boss"){
 
-  hp = 2500;
+    hp = 2500;
 
-  speed = 0.15;
+    speed = 0.15;
 
-  zombie.style.width = "180px";
-  zombie.style.height = "180px";
-
-}
+    zombie.style.width = "180px";
+    zombie.style.height = "180px";
+  }
 
   const data = {
 
@@ -562,15 +571,11 @@ function gameLoop(){
 
       if(bullet.x > zombie.x){
 
-        // DAÑO
-
         if(bullet.fire){
           zombie.hp -= 40;
         }else{
           zombie.hp -= 20;
         }
-
-        // VIDA
 
         zombie.hpBar.style.width =
           (zombie.hp/zombie.maxHp)*100 + "%";
@@ -579,13 +584,22 @@ function gameLoop(){
 
         bullets.splice(bi,1);
 
-        // MORIR
-
         if(zombie.hp <= 0){
 
           zombie.element.remove();
 
           zombies.splice(zi,1);
+
+          zombiesKilled++;
+
+          checkLevelProgress();
+
+          if(zombie.type === "boss"){
+
+            alert("FELICIDADES VICIADO, AHORA BUSCA UN PISCOLOGO");
+
+            location.reload();
+          }
 
           suns += 25;
 
@@ -619,67 +633,67 @@ function gameLoop(){
       if(zombie.x <= px+50){
 
         // ==================================
-// PETASETA
-// ==================================
+        // PETASETA
+        // ==================================
 
-if(plant.type === "doomshroom"){
+        if(plant.type === "doomshroom"){
 
-  // EXPLOSION VISUAL
+          const explosion = document.createElement("div");
 
-  const explosion = document.createElement("div");
+          explosion.classList.add("explosion");
 
-  explosion.classList.add("explosion");
+          explosion.style.width = "320px";
+          explosion.style.height = "320px";
 
-  explosion.style.width = "320px";
-  explosion.style.height = "320px";
+          explosion.style.left =
+            (plant.col * 100 - 110) + "px";
 
-  explosion.style.left =
-    (plant.col * 100 - 110) + "px";
+          explosion.style.top =
+            (plant.row * 100 - 110) + "px";
 
-  explosion.style.top =
-    (plant.row * 100 - 110) + "px";
+          explosion.style.background =
+            "radial-gradient(circle, #d600ff, #5b0075)";
 
-  explosion.style.background =
-    "radial-gradient(circle, #d600ff, #5b0075)";
+          grid.appendChild(explosion);
 
-  grid.appendChild(explosion);
+          setTimeout(()=>{
 
-  setTimeout(()=>{
+            explosion.remove();
 
-    explosion.remove();
+          },500);
 
-  },500);
+          for(let zi = zombies.length - 1; zi >= 0; zi--){
 
-  // MATAR ZOMBIES
-  for(let zi = zombies.length - 1; zi >= 0; zi--){
+            const z = zombies[zi];
 
-    const z = zombies[zi];
+            const dx =
+              Math.abs(z.x - (plant.col * 100));
 
-    const dx =
-      Math.abs(z.x - (plant.col * 100));
+            const dy =
+              Math.abs(z.row - plant.row);
 
-    const dy =
-      Math.abs(z.row - plant.row);
+            if(dx < 220 && dy <= 1){
 
-    if(dx < 220 && dy <= 1){
+              z.element.remove();
 
-      z.element.remove();
+              zombies.splice(zi,1);
 
-      zombies.splice(zi,1);
+              zombiesKilled++;
 
-      suns += 25;
-    }
-  }
+              checkLevelProgress();
 
-  updateSun();
+              suns += 25;
+            }
+          }
 
-  // ELIMINAR PETASETA
-  plant.element.remove();
+          updateSun();
 
-  plants.splice(pi,1);
+          plant.element.remove();
 
-  return;
-}
+          plants.splice(pi,1);
+
+          return;
+        }
 
         // ==================================
         // DAÑO NORMAL
@@ -698,65 +712,22 @@ if(plant.type === "doomshroom"){
       }
     });
 
-// ==================================
-// PODADORAS
-// ==================================
+    // ==================================
+    // PODADORAS
+    // ==================================
 
-lawnmowers.forEach((mower)=>{
+    lawnmowers.forEach((mower)=>{
 
-  // ACTIVAR
-  if(
-    !mower.used &&
-    zombie.row === mower.row &&
-    zombie.x <= 40
-  ){
-    mower.active = true;
-    mower.used = true;
-  }
+      if(
+        !mower.used &&
+        zombie.row === mower.row &&
+        zombie.x <= 40
+      ){
+        mower.active = true;
+        mower.used = true;
+      }
 
-});
-
-// ==================================
-// MOVER PODADORAS
-// ==================================
-
-lawnmowers.forEach((mower)=>{
-
-  if(!mower.active) return;
-
-  mower.x += 8;
-
-  mower.element.style.left = mower.x + "px";
-
-  // MATAR ZOMBIES
-  for(let zi = zombies.length - 1; zi >= 0; zi--){
-
-    const z = zombies[zi];
-
-    if(
-      z.row === mower.row &&
-      Math.abs(z.x - mower.x) < 80
-    ){
-
-      z.element.remove();
-
-      zombies.splice(zi,1);
-
-      suns += 25;
-
-      updateSun();
-    }
-  }
-
-  // ELIMINAR PODADORA AL FINAL
-  if(mower.x > 950){
-
-    mower.active = false;
-
-    mower.element.remove();
-  }
-
-});
+    });
 
     // ==================================
     // GAME OVER
@@ -771,8 +742,53 @@ lawnmowers.forEach((mower)=>{
 
   });
 
+  // ==================================
+  // MOVER PODADORAS
+  // ==================================
+
+  lawnmowers.forEach((mower)=>{
+
+    if(!mower.active) return;
+
+    mower.x += 8;
+
+    mower.element.style.left = mower.x + "px";
+
+    for(let zi = zombies.length - 1; zi >= 0; zi--){
+
+      const z = zombies[zi];
+
+      if(
+        z.row === mower.row &&
+        Math.abs(z.x - mower.x) < 80
+      ){
+
+        z.element.remove();
+
+        zombies.splice(zi,1);
+
+        zombiesKilled++;
+
+        checkLevelProgress();
+
+        suns += 25;
+
+        updateSun();
+      }
+    }
+
+    if(mower.x > 950){
+
+      mower.active = false;
+
+      mower.element.remove();
+    }
+
+  });
+
   requestAnimationFrame(gameLoop);
 }
+
 // ======================================
 // NIVELES
 // ======================================
@@ -815,6 +831,7 @@ function checkLevelProgress(){
     );
   }
 }
+
 gameLoop();
 
 // ======================================
@@ -832,7 +849,12 @@ setInterval(()=>{
   }
 
   if(currentLevel === 3){
-    amount = 4;
+
+    if(bossSpawned){
+      amount = 0;
+    }else{
+      amount = 1;
+    }
   }
 
   for(let i=0;i<amount;i++){
