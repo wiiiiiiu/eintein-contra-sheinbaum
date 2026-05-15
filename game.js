@@ -632,6 +632,23 @@ function gameLoop(){
 
       if(zombie.x <= px+50){
 
+  zombie.eating = true;
+
+  plant.hp -= 0.4;
+
+  if(plant.hp <= 0){
+
+    plant.element.remove();
+
+    plants.splice(pi,1);
+
+    zombie.eating = false;
+  }
+
+}else{
+
+  zombie.eating = false;
+}
         // ==================================
         // PETASETA
         // ==================================
