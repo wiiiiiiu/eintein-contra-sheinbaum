@@ -107,7 +107,10 @@ for(let r=0;r<rows;r++){
 
     cell.addEventListener("click", ()=>{
 
+      // ==================================
       // PALA
+      // ==================================
+
       if(shovelMode){
 
         const plantElement = cell.querySelector(".plant");
@@ -127,6 +130,10 @@ for(let r=0;r<rows;r++){
 
         return;
       }
+
+      // ==================================
+      // PLANTAR
+      // ==================================
 
       if(!selectedPlant) return;
 
@@ -156,7 +163,14 @@ for(let r=0;r<rows;r++){
 
   mower.classList.add("lawnmower");
 
-  mower.innerHTML = "🚜";
+  const mowerImg = document.createElement("img");
+
+  mowerImg.src = "img/lawnmower.png";
+
+  mowerImg.style.width = "100%";
+  mowerImg.style.height = "100%";
+
+  mower.appendChild(mowerImg);
 
   grid.appendChild(mower);
 
@@ -280,6 +294,8 @@ function createPlant(type, cell, row, col){
 
   plant.classList.add("plant");
 
+  // PETASETA
+
   if(type === "doomshroom"){
     plant.classList.add("doomShroom");
   }
@@ -321,6 +337,7 @@ function createZombie(type, row){
   zombie.appendChild(img);
 
   const hpBar = document.createElement("div");
+
   hpBar.classList.add("health");
 
   zombie.appendChild(hpBar);
@@ -404,7 +421,7 @@ function updateSun(){
 }
 
 // ======================================
-// SOLES
+// CREAR SOLES
 // ======================================
 
 function createSun(x,y){
@@ -437,7 +454,7 @@ function createSun(x,y){
 }
 
 // ======================================
-// LOOP
+// LOOP PRINCIPAL
 // ======================================
 
 function gameLoop(){
@@ -457,7 +474,9 @@ function gameLoop(){
 
     plant.cooldown--;
 
+    // ==================================
     // PEASHOOTER
+    // ==================================
 
     if(plant.type === "peashooter"){
 
@@ -490,7 +509,9 @@ function gameLoop(){
       }
     }
 
+    // ==================================
     // GIRASOL
+    // ==================================
 
     if(plant.type === "sunflower"){
 
@@ -523,11 +544,15 @@ function gameLoop(){
 
       if(bullet.x > zombie.x){
 
+        // DAÑO
+
         if(bullet.fire){
           zombie.hp -= 40;
         }else{
           zombie.hp -= 20;
         }
+
+        // VIDA
 
         zombie.hpBar.style.width =
           (zombie.hp/zombie.maxHp)*100 + "%";
@@ -535,6 +560,8 @@ function gameLoop(){
         bullet.element.remove();
 
         bullets.splice(bi,1);
+
+        // MORIR
 
         if(zombie.hp <= 0){
 
@@ -561,6 +588,10 @@ function gameLoop(){
 
     zombie.element.style.left = zombie.x+"px";
 
+    // ==================================
+    // COMER PLANTAS
+    // ==================================
+
     plants.forEach((plant,pi)=>{
 
       if(plant.row !== zombie.row) return;
@@ -575,6 +606,8 @@ function gameLoop(){
 
         if(plant.type === "doomshroom"){
 
+          // EXPLOSION
+
           const explosion = document.createElement("div");
 
           explosion.classList.add("explosion");
@@ -582,8 +615,11 @@ function gameLoop(){
           explosion.style.width = "300px";
           explosion.style.height = "300px";
 
-          explosion.style.left = (plant.col*100 - 100)+"px";
-          explosion.style.top = (plant.row*100 - 100)+"px";
+          explosion.style.left =
+            (plant.col*100 - 100)+"px";
+
+          explosion.style.top =
+            (plant.row*100 - 100)+"px";
 
           explosion.style.background = "purple";
 
@@ -595,11 +631,15 @@ function gameLoop(){
 
           },500);
 
+          // MATAR ZOMBIES
+
           zombies.forEach((z,zi)=>{
 
-            const dx = Math.abs(z.x - (plant.col*100));
+            const dx =
+              Math.abs(z.x - (plant.col*100));
 
-            const dy = Math.abs(z.row - plant.row);
+            const dy =
+              Math.abs(z.row - plant.row);
 
             if(dx < 180 && dy <= 1){
 
@@ -614,12 +654,18 @@ function gameLoop(){
 
           updateSun();
 
+          // ELIMINAR PETASETA
+
           plant.element.remove();
 
           plants.splice(pi,1);
 
           return;
         }
+
+        // ==================================
+        // DAÑO NORMAL
+        // ==================================
 
         zombie.x += zombie.speed;
 
@@ -642,6 +688,8 @@ function gameLoop(){
 
       if(mower.used) return;
 
+      // ACTIVAR
+
       if(
         zombie.row === mower.row &&
         zombie.x <= 40
@@ -651,11 +699,16 @@ function gameLoop(){
         mower.used = true;
       }
 
+      // MOVER
+
       if(mower.active){
 
         mower.x += 8;
 
-        mower.element.style.left = mower.x+"px";
+        mower.element.style.left =
+          mower.x+"px";
+
+        // MATAR ZOMBIES
 
         zombies.forEach((z,zi)=>{
 
@@ -665,9 +718,11 @@ function gameLoop(){
           ){
 
             z.element.remove();
+
             zombies.splice(zi,1);
 
             suns += 25;
+
             updateSun();
           }
 
@@ -677,7 +732,9 @@ function gameLoop(){
 
     });
 
+    // ==================================
     // GAME OVER
+    // ==================================
 
     if(zombie.x <= -50){
 
@@ -703,7 +760,8 @@ setInterval(()=>{
 
   for(let i=0;i<2;i++){
 
-    const row = Math.floor(Math.random()*rows);
+    const row =
+      Math.floor(Math.random()*rows);
 
     const random = Math.random();
 
