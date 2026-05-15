@@ -365,19 +365,19 @@ function createZombie(type, row){
   let speed = 0.3 + (currentLevel * 0.03);
 
   if(type === "cone"){
-    hp = 230;
+    hp = 280;
   }
 
   if(type === "bucket"){
-    hp = 350;
-    speed = 0.2;
+    hp = 400;
+    speed = 0.25;
   }
 
   if(type === "boss"){
 
-    hp = 8000;
+    hp = 10000;
 
-    speed = 0.15;
+    speed = 0.16;
 
     zombie.style.width = "180px";
     zombie.style.height = "180px";
@@ -596,7 +596,7 @@ function gameLoop(){
 
           if(zombie.type === "boss"){
 
-            alert("FELICIDADES VICIADO, AHORA BUSCA UN PISCOLOGO");
+            alert("felicidades ahora busca un trabajo");
 
             location.reload();
           }
@@ -632,23 +632,6 @@ function gameLoop(){
 
       if(zombie.x <= px+50){
 
-  zombie.eating = true;
-
-  plant.hp -= 0.4;
-
-  if(plant.hp <= 0){
-
-    plant.element.remove();
-
-    plants.splice(pi,1);
-
-    zombie.eating = false;
-  }
-
-}else{
-
-  zombie.eating = false;
-}
         // ==================================
         // PETASETA
         // ==================================
@@ -689,7 +672,7 @@ function gameLoop(){
             const dy =
               Math.abs(z.row - plant.row);
 
-if(dx < 220 && dy <= 1){
+            if(dx < 220 && dy <= 1){
 
   z.hp -= 300;
 
@@ -706,9 +689,9 @@ if(dx < 220 && dy <= 1){
 
     checkLevelProgress();
 
-    suns += 25;
-  }
-}
+          suns += 25;
+         }
+         }
           }
 
           updateSun();
