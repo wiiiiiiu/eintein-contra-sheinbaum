@@ -147,11 +147,6 @@ body{
   font-weight:bold;
 }
 
-.shovelCard{
-  font-size:38px;
-  color:black;
-}
-
 /* ========================= */
 /* GAME */
 /* ========================= */
@@ -177,6 +172,8 @@ body{
 
   background:#6bc14f;
   border:5px solid #2f5f1f;
+
+  overflow:hidden;
 }
 
 /* ========================= */
@@ -261,4 +258,83 @@ body{
   height:60px;
   z-index:50;
   cursor:pointer;
+}
+
+/* ========================= */
+/* PODADORAS */
+/* ========================= */
+
+.lawnmower{
+
+  position:absolute;
+
+  width:70px;
+  height:70px;
+
+  z-index:30;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  font-size:42px;
+
+  transition:left 0.05s linear;
+}
+
+/* ========================= */
+/* PETASETA */
+/* ========================= */
+
+.doomShroom{
+
+  animation:doomPulse 0.8s infinite;
+}
+
+@keyframes doomPulse{
+
+  0%{
+    transform:translate(-50%, -50%) scale(1);
+    filter:brightness(1);
+  }
+
+  50%{
+    transform:translate(-50%, -50%) scale(1.12);
+    filter:brightness(1.4);
+  }
+
+  100%{
+    transform:translate(-50%, -50%) scale(1);
+    filter:brightness(1);
+  }
+}
+
+/* ========================= */
+/* EXPLOSION */
+/* ========================= */
+
+.explosion{
+
+  position:absolute;
+
+  border-radius:50%;
+
+  opacity:0.75;
+
+  z-index:100;
+
+  animation:explode 0.5s forwards;
+}
+
+@keyframes explode{
+
+  0%{
+    transform:scale(0.2);
+    opacity:1;
+  }
+
+  100%{
+    transform:scale(1.8);
+    opacity:0;
+  }
 }
