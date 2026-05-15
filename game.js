@@ -18,8 +18,8 @@ const IMAGES = {
 
     normal:"img/zombie.png",
     cone:"img/conehead.png",
-    bucket:"img/buckethead.png"
-
+    bucket:"img/buckethead.png",
+    boss:"img/boss.png"
   },
 
   sun:"img/sun.png"
@@ -47,6 +47,12 @@ let gameMode = "infinite";
 let gameStarted = false;
 
 let gameTime = 180;
+
+let currentLevel = 1;
+
+let zombiesKilled = 0;
+
+let bossSpawned = false;
 
 const plants = [];
 const zombies = [];
@@ -344,8 +350,9 @@ function createZombie(type, row){
 
   grid.appendChild(zombie);
 
-  let hp = 100;
-  let speed = 0.3;
+let hp = 100 + (currentLevel * 20);
+
+let speed = 0.3 + (currentLevel * 0.03);
 
   if(type === "cone"){
     hp = 180;
@@ -355,6 +362,17 @@ function createZombie(type, row){
     hp = 300;
     speed = 0.2;
   }
+
+  if(type === "boss"){
+
+  hp = 2500;
+
+  speed = 0.15;
+
+  zombie.style.width = "180px";
+  zombie.style.height = "180px";
+
+}
 
   const data = {
 
@@ -601,67 +619,67 @@ function gameLoop(){
       if(zombie.x <= px+50){
 
         // ==================================
-        // PETASETA
-        // ==================================
+// PETASETA
+// ==================================
 
-        if(plant.type === "doomshroom"){
+if(plant.type === "doomshroom"){
 
-          // EXPLOSION
+  // EXPLOSION VISUAL
 
-          const explosion = document.createElement("div");
+  const explosion = document.createElement("div");
 
-          explosion.classList.add("explosion");
+  explosion.classList.add("explosion");
 
-          explosion.style.width = "300px";
-          explosion.style.height = "300px";
+  explosion.style.width = "320px";
+  explosion.style.height = "320px";
 
-          explosion.style.left =
-            (plant.col*100 - 100)+"px";
+  explosion.style.left =
+    (plant.col * 100 - 110) + "px";
 
-          explosion.style.top =
-            (plant.row*100 - 100)+"px";
+  explosion.style.top =
+    (plant.row * 100 - 110) + "px";
 
-          explosion.style.background = "purple";
+  explosion.style.background =
+    "radial-gradient(circle, #d600ff, #5b0075)";
 
-          grid.appendChild(explosion);
+  grid.appendChild(explosion);
 
-          setTimeout(()=>{
+  setTimeout(()=>{
 
-            explosion.remove();
+    explosion.remove();
 
-          },500);
+  },500);
 
-          // MATAR ZOMBIES
+  // MATAR ZOMBIES
+  for(let zi = zombies.length - 1; zi >= 0; zi--){
 
-          zombies.forEach((z,zi)=>{
+    const z = zombies[zi];
 
-            const dx =
-              Math.abs(z.x - (plant.col*100));
+    const dx =
+      Math.abs(z.x - (plant.col * 100));
 
-            const dy =
-              Math.abs(z.row - plant.row);
+    const dy =
+      Math.abs(z.row - plant.row);
 
-            if(dx < 180 && dy <= 1){
+    if(dx < 220 && dy <= 1){
 
-              z.element.remove();
+      z.element.remove();
 
-              zombies.splice(zi,1);
+      zombies.splice(zi,1);
 
-              suns += 25;
-            }
+      suns += 25;
+    }
+  }
 
-          });
+  updateSun();
 
-          updateSun();
+  // ELIMINAR PETASETA
+  plant.element.remove();
 
-          // ELIMINAR PETASETA
+  plants.splice(pi,1);
 
-          plant.element.remove();
-
-          plants.splice(pi,1);
-
-          return;
-        }
+  return;
+}
 
         // ==================================
         // DAÑO NORMAL
@@ -680,57 +698,65 @@ function gameLoop(){
       }
     });
 
-    // ==================================
-    // PODADORAS
-    // ==================================
+// ==================================
+// PODADORAS
+// ==================================
 
-    lawnmowers.forEach((mower)=>{
+lawnmowers.forEach((mower)=>{
 
-      if(mower.used) return;
+  // ACTIVAR
+  if(
+    !mower.used &&
+    zombie.row === mower.row &&
+    zombie.x <= 40
+  ){
+    mower.active = true;
+    mower.used = true;
+  }
 
-      // ACTIVAR
+});
 
-      if(
-        zombie.row === mower.row &&
-        zombie.x <= 40
-      ){
+// ==================================
+// MOVER PODADORAS
+// ==================================
 
-        mower.active = true;
-        mower.used = true;
-      }
+lawnmowers.forEach((mower)=>{
 
-      // MOVER
+  if(!mower.active) return;
 
-      if(mower.active){
+  mower.x += 8;
 
-        mower.x += 8;
+  mower.element.style.left = mower.x + "px";
 
-        mower.element.style.left =
-          mower.x+"px";
+  // MATAR ZOMBIES
+  for(let zi = zombies.length - 1; zi >= 0; zi--){
 
-        // MATAR ZOMBIES
+    const z = zombies[zi];
 
-        zombies.forEach((z,zi)=>{
+    if(
+      z.row === mower.row &&
+      Math.abs(z.x - mower.x) < 80
+    ){
 
-          if(
-            z.row === mower.row &&
-            Math.abs(z.x - mower.x) < 60
-          ){
+      z.element.remove();
 
-            z.element.remove();
+      zombies.splice(zi,1);
 
-            zombies.splice(zi,1);
+      suns += 25;
 
-            suns += 25;
+      updateSun();
+    }
+  }
 
-            updateSun();
-          }
+  // ELIMINAR PODADORA AL FINAL
+  if(mower.x > 950){
 
-        });
+    mower.active = false;
 
-      }
+    mower.element.remove();
+  }
 
-    });
+});
 
     // ==================================
     // GAME OVER
@@ -747,7 +773,48 @@ function gameLoop(){
 
   requestAnimationFrame(gameLoop);
 }
+// ======================================
+// NIVELES
+// ======================================
 
+function checkLevelProgress(){
+
+  // NIVEL 2
+  if(
+    currentLevel === 1 &&
+    zombiesKilled >= 15
+  ){
+
+    currentLevel = 2;
+
+    alert("NIVEL 2");
+  }
+
+  // NIVEL 3
+  if(
+    currentLevel === 2 &&
+    zombiesKilled >= 35
+  ){
+
+    currentLevel = 3;
+
+    alert("NIVEL 3 - JEFE FINAL");
+  }
+
+  // JEFE
+  if(
+    currentLevel === 3 &&
+    !bossSpawned
+  ){
+
+    bossSpawned = true;
+
+    createZombie(
+      "boss",
+      Math.floor(Math.random()*rows)
+    );
+  }
+}
 gameLoop();
 
 // ======================================
@@ -758,7 +825,17 @@ setInterval(()=>{
 
   if(!gameStarted) return;
 
-  for(let i=0;i<2;i++){
+  let amount = 2;
+
+  if(currentLevel === 2){
+    amount = 3;
+  }
+
+  if(currentLevel === 3){
+    amount = 4;
+  }
+
+  for(let i=0;i<amount;i++){
 
     const row =
       Math.floor(Math.random()*rows);
@@ -767,11 +844,11 @@ setInterval(()=>{
 
     let type = "normal";
 
-    if(random > 0.6){
+    if(random > 0.5){
       type = "cone";
     }
 
-    if(random > 0.85){
+    if(random > 0.8){
       type = "bucket";
     }
 
