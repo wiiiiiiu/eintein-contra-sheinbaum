@@ -672,18 +672,26 @@ function gameLoop(){
             const dy =
               Math.abs(z.row - plant.row);
 
-            if(dx < 220 && dy <= 1){
+if(dx < 220 && dy <= 1){
 
-              z.element.remove();
+  z.hp -= 300;
 
-              zombies.splice(zi,1);
+  z.hpBar.style.width =
+    (z.hp / z.maxHp) * 100 + "%";
 
-              zombiesKilled++;
+  if(z.hp <= 0){
 
-              checkLevelProgress();
+    z.element.remove();
 
-              suns += 25;
-            }
+    zombies.splice(zi,1);
+
+    zombiesKilled++;
+
+    checkLevelProgress();
+
+    suns += 25;
+  }
+}
           }
 
           updateSun();
