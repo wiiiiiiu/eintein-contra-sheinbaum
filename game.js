@@ -417,14 +417,14 @@ function createZombie(type, row){
 
   if(type === "bucket"){
     hp = 400;
-    speed = 0.25;
+    speed = 0.5;
   }
 
   if(type === "boss"){
 
     hp = 10000;
 
-    speed = 0.16;
+    speed = 0.35;
 
     zombie.style.width = "180px";
     zombie.style.height = "180px";
