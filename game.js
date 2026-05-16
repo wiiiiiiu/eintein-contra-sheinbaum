@@ -37,6 +37,20 @@ const grid = document.getElementById("grid");
 const sunCount = document.getElementById("sunCount");
 const timerFill = document.getElementById("timerFill");
 
+
+
+let achievements = {
+  corrupt: false,
+  noPlant: false,
+  bossPerfect: false,
+  survivor: false
+};
+
+let zombieKillsForAchievement = 0;
+let lastPlantTime = Date.now();
+let plantsLostDuringBoss = 0;
+let bossActive = false;
+
 let suns = 200;
 
 let selectedPlant = null;
@@ -54,6 +68,13 @@ let currentLevel = 1;
 let zombiesKilled = 0;
 
 let bossSpawned = false;
+
+const sounds = {
+  corrupt: new Audio("mp3/corrupt.mp3"),
+  noPlant: new Audio("mp3/noplant.mp3"),
+  boss: new Audio("mp3/boss.mp3"),
+  survivor: new Audio("mp3/survivor.mp3")
+};
 
 const plants = [];
 const zombies = [];
@@ -94,6 +115,29 @@ const PLANT_DATA = {
     explosive:true
   }
 };
+
+function showAchievement(text, imgSrc){
+
+  const div = document.createElement("div");
+
+  div.innerHTML = `
+    <img src="${imgSrc}" style="width:40px;height:40px;vertical-align:middle;">
+    <span>${text}</span>
+  `;
+
+  div.style.position = "fixed";
+  div.style.bottom = "20px";
+  div.style.right = "20px";
+  div.style.background = "black";
+  div.style.color = "white";
+  div.style.padding = "10px";
+  div.style.borderRadius = "10px";
+  div.style.zIndex = 9999;
+
+  document.body.appendChild(div);
+
+  setTimeout(()=>div.remove(), 5000);
+}
 
 // ======================================
 // GRID
@@ -289,11 +333,12 @@ function startGame(){
 
     },1000);
 
-  }else{
+ }else{
 
-    timerFill.style.display = "none";
-  }
+  infiniteStart = Date.now();
 
+  timerFill.style.display = "none";
+}
 }
 
 // ======================================
@@ -325,6 +370,8 @@ function createPlant(type, cell, row, col){
 
     cooldown:0
   };
+
+  lastPlantTime = Date.now();
 
   plants.push(data);
 }
@@ -493,6 +540,8 @@ function gameLoop(){
     return;
   }
 
+
+  
   // ==================================
   // PLANTAS
   // ==================================
@@ -592,6 +641,19 @@ function gameLoop(){
 
           zombiesKilled++;
 
+          if(!achievements.corrupt){
+         zombieKillsForAchievement++;
+
+          if(zombieKillsForAchievement >= 100){
+       
+         achievements.corrupt = true;
+
+         sounds.corrupt.play();
+
+          showAchievement("Mata corruptos", "img/logro-corrupto.png");
+         }
+         } 
+
           checkLevelProgress();
 
           if(zombie.type === "boss"){
@@ -599,6 +661,16 @@ function gameLoop(){
             alert("felicidades ahora busca un trabajo");
 
             location.reload();
+
+            if(!achievements.bossPerfect && plantsLostDuringBoss === 0){
+
+           achievements.bossPerfect = true;
+    
+           sounds.boss.play();
+
+            showAchievement("Me la pelo tu jueguito w", "img/logro-boss.png");
+           }
+
           }
 
           suns += 25;
@@ -610,6 +682,8 @@ function gameLoop(){
 
   });
 
+  
+  
   // ==================================
   // ZOMBIES
   // ==================================
@@ -713,12 +787,25 @@ function gameLoop(){
 
         if(plant.hp <= 0){
 
+          if(bossActive){
+  plantsLostDuringBoss++;
+}
+
           plant.element.remove();
 
           plants.splice(pi,1);
         }
       }
     });
+
+    if(!achievements.noPlant && Date.now() - lastPlantTime >= 30000){
+
+  achievements.noPlant = true;
+
+  sounds.noPlant.play();
+
+  showAchievement("¿Tas loco?", "img/logro-loco.png");
+}
 
     // ==================================
     // PODADORAS
@@ -825,22 +912,24 @@ function checkLevelProgress(){
     alert("NIVEL 3 - JEFE FINAL");
   }
 
-  // JEFE
-  if(
-    currentLevel === 3 &&
-    !bossSpawned
-  ){
+// JEFE
+if(currentLevel === 3 && !bossSpawned){
 
-    bossSpawned = true;
+  bossActive = true;
+  plantsLostDuringBoss = 0;
 
-    createZombie(
-      "boss",
-      Math.floor(Math.random()*rows)
-    );
-  }
+  bossSpawned = true;
+
+  createZombie(
+    "boss",
+    Math.floor(Math.random()*rows)
+  );
+}
 }
 
 gameLoop();
+
+
 
 // ======================================
 // GENERADOR DE ZOMBIES
@@ -887,6 +976,25 @@ setInterval(()=>{
   }
 
 },2500);
+
+
+// LOGRO INFINITO
+if(gameMode === "infinite" && !achievements.survivor){
+
+  if(Date.now() - infiniteStart >= 600000){
+
+    achievements.survivor = true;
+
+    sounds.survivor.play();
+
+    showAchievement(
+      "Domador de corrupción",
+      "img/logro-corrupcion.png"
+    );
+  }
+}
+
+requestAnimationFrame(gameLoop);
 
 // ======================================
 // GENERADOR DE SOLES
